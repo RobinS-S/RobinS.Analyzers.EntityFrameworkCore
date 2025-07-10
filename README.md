@@ -1,6 +1,10 @@
 # RobinS.Analyzers.EntityFrameworkCore
 
-A Roslyn analyzer that detects synchronous Entity Framework Core calls in async contexts and suggests async alternatives to prevent thread pool starvation and deadlocks.
+A Roslyn analyzer package for Entity Framework Core that helps developers write efficient, maintainable, and robust data access code.
+
+## Overview
+
+This analyzer package provides a growing set of rules to improve Entity Framework Core code quality and performance. By integrating seamlessly with the development process, it offers real-time guidance and suggestions as you write code, helping to enforce best practices and avoid common pitfalls in EF Core applications.
 
 ## Features
 
@@ -21,7 +25,19 @@ Add the analyzer to your project:
 
 Or build from source and reference the output DLL.
 
-## Examples
+## Diagnostic Rules
+
+### EFASYNC001: Use async EF Core method
+
+**Severity:** Warning
+
+**Description:** Detects synchronous EF Core calls in asynchronous contexts that should use their async alternatives.
+
+**Problem:** Synchronous database operations in async methods can lead to thread pool starvation and potential deadlocks, especially in ASP.NET applications.
+
+**Solution:** Replace synchronous calls with their asynchronous counterparts.
+
+#### Examples
 
 The analyzer will flag these patterns when they appear in async methods:
 
@@ -29,13 +45,21 @@ The analyzer will flag these patterns when they appear in async methods:
 // In an async method:
 async Task GetUsersAsync()
 {
-    // ❌ Will trigger EFASYNC001
-    var users = context.Users.ToList();
-    var user = context.Users.First();
-    var count = context.Users.Count();
-    context.SaveChanges();
+    // ❌ Problematic: Will trigger EFASYNC001 warnings
+    var users = context.Users.ToList();      // Blocks the thread while querying
+    var user = context.Users.First();        // Blocks the thread while querying
+    var count = context.Users.Count();       // Blocks the thread while querying
+    context.SaveChanges();                  // Blocks the thread while saving
+}
+```
 
-    // ✅ Recommended alternatives
+##### Recommended Fixes
+
+```csharp
+// In an async method:
+async Task GetUsersAsync()
+{
+    // ✅ Correct: Using proper async alternatives
     var users = await context.Users.ToListAsync();
     var user = await context.Users.FirstAsync();
     var count = await context.Users.CountAsync();
@@ -43,7 +67,7 @@ async Task GetUsersAsync()
 }
 ```
 
-But will ignore these (no false positives):
+The rule is designed to minimize false positives and will ignore these scenarios:
 
 ```csharp
 // ✅ Sync methods in non-async contexts are allowed
@@ -74,6 +98,13 @@ async Task GetUsersFromInterfaceAsync()
 }
 ```
 
+#### Detected Methods
+
+The analyzer detects these synchronous methods when used in async contexts:
+- Materializers: `ToList()`, `ToArray()`, `First()`, `FirstOrDefault()`, etc.
+- Aggregators: `Count()`, `Sum()`, `Min()`, `Max()`, `Average()`, etc.
+- Context operations: `SaveChanges()`, `Load()`
+
 ## Diagnostic Codes (so far)
 
 - `EFASYNC001`: Use async EF Core method (Warning)
@@ -97,9 +128,8 @@ dotnet test
 
 More rules are planned for future releases.
 
-Contributions are welcome! If you have ideas for improvements or new features:
-- Open an issue to discuss your proposal
-- Submit a PR with your changes
+Contributions are welcome! If you have ideas for improvements or new rules:
+- Open an issue to discuss your idea or improvement or just straightaway submit a PR with your changes
 - Ensure tests are included for any new functionality
 
 ## License
