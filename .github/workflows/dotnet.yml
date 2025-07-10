@@ -40,7 +40,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: nuget-packages
-        path: ${{ env.NuGetDirectory }}/*.{nupkg,snupkg}
+        path: ${{ env.NuGetDirectory }}/*.nupkg
         if-no-files-found: error
         retention-days: 7
   
