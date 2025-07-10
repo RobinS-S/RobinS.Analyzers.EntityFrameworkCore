@@ -6,15 +6,6 @@ A Roslyn analyzer package for Entity Framework Core that helps developers write 
 
 This analyzer package provides a growing set of rules to improve Entity Framework Core code quality and performance. By integrating seamlessly with the development process, it offers real-time guidance and suggestions as you write code, helping to enforce best practices and avoid common pitfalls in EF Core applications.
 
-## Features
-
-- Detects synchronous EF Core materializers like `ToList()`, `ToArray()`, `First()`, `FirstOrDefault()`, `Single()`, `SingleOrDefault()`, `Any()`, `Count()`, `All()`, `Last()`, `LastOrDefault()`, `ElementAt()`, `ElementAtOrDefault()`, `Min()`, `Max()`, `Sum()`, `Average()`, `Aggregate()`, `Contains()`, `SequenceEqual()`, `LongCount()`, `Load()`
-- Detects synchronous `DbContext.SaveChanges()` calls
-- Works with interface-based DbContext patterns
-- Only flags calls on `IQueryable<T>` types (from EF DbSets) to avoid false positives on in-memory collections
-- Only flags issues in async contexts (methods marked with async keyword or returning Task/ValueTask)
-- Provides clear warning messages suggesting async alternatives
-
 ## Usage
 
 Add the analyzer to your project:
@@ -28,6 +19,7 @@ Or build from source and reference the output DLL.
 ## Diagnostic Rules
 
 ### EFASYNC001: Use async EF Core method
+![Visual Studio Warnings Example](docs/example.png)
 
 **Severity:** Warning
 
